@@ -2,13 +2,12 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v6.33.0
-// source: proto/items/items.proto
+// source: items/items.proto
 
 package items
 
 import (
 	context "context"
-
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -20,8 +19,9 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	ItemService_GetItem_FullMethodName    = "/items.ItemService/GetItem"
-	ItemService_CreateItem_FullMethodName = "/items.ItemService/CreateItem"
+	ItemService_GetItem_FullMethodName     = "/items.ItemService/GetItem"
+	ItemService_CreateItem_FullMethodName  = "/items.ItemService/CreateItem"
+	ItemService_GetAllItems_FullMethodName = "/items.ItemService/GetAllItems"
 )
 
 // ItemServiceClient is the client API for ItemService service.
@@ -30,6 +30,7 @@ const (
 type ItemServiceClient interface {
 	GetItem(ctx context.Context, in *GetItemRequest, opts ...grpc.CallOption) (*GetItemResponse, error)
 	CreateItem(ctx context.Context, in *CreateItemRequest, opts ...grpc.CallOption) (*CreateItemResponse, error)
+	GetAllItems(ctx context.Context, in *GetAllItemsRequest, opts ...grpc.CallOption) (*GetAllItemsResponse, error)
 }
 
 type itemServiceClient struct {
@@ -60,12 +61,23 @@ func (c *itemServiceClient) CreateItem(ctx context.Context, in *CreateItemReques
 	return out, nil
 }
 
+func (c *itemServiceClient) GetAllItems(ctx context.Context, in *GetAllItemsRequest, opts ...grpc.CallOption) (*GetAllItemsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetAllItemsResponse)
+	err := c.cc.Invoke(ctx, ItemService_GetAllItems_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ItemServiceServer is the server API for ItemService service.
 // All implementations must embed UnimplementedItemServiceServer
 // for forward compatibility.
 type ItemServiceServer interface {
 	GetItem(context.Context, *GetItemRequest) (*GetItemResponse, error)
 	CreateItem(context.Context, *CreateItemRequest) (*CreateItemResponse, error)
+	GetAllItems(context.Context, *GetAllItemsRequest) (*GetAllItemsResponse, error)
 	mustEmbedUnimplementedItemServiceServer()
 }
 
@@ -81,6 +93,9 @@ func (UnimplementedItemServiceServer) GetItem(context.Context, *GetItemRequest) 
 }
 func (UnimplementedItemServiceServer) CreateItem(context.Context, *CreateItemRequest) (*CreateItemResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateItem not implemented")
+}
+func (UnimplementedItemServiceServer) GetAllItems(context.Context, *GetAllItemsRequest) (*GetAllItemsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAllItems not implemented")
 }
 func (UnimplementedItemServiceServer) mustEmbedUnimplementedItemServiceServer() {}
 func (UnimplementedItemServiceServer) testEmbeddedByValue()                     {}
@@ -139,6 +154,24 @@ func _ItemService_CreateItem_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ItemService_GetAllItems_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAllItemsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ItemServiceServer).GetAllItems(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ItemService_GetAllItems_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ItemServiceServer).GetAllItems(ctx, req.(*GetAllItemsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ItemService_ServiceDesc is the grpc.ServiceDesc for ItemService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -154,7 +187,11 @@ var ItemService_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "CreateItem",
 			Handler:    _ItemService_CreateItem_Handler,
 		},
+		{
+			MethodName: "GetAllItems",
+			Handler:    _ItemService_GetAllItems_Handler,
+		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "proto/items/items.proto",
+	Metadata: "items/items.proto",
 }

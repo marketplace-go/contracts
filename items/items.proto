@@ -4,11 +4,12 @@ package items;
 
 import "google/protobuf/timestamp.proto";
 
-option go_package = "./proto/items;proto";
+option go_package = "github.com/marketplace-go/contracts/items;items";
 
 service ItemService {
   rpc GetItem(GetItemRequest) returns (GetItemResponse);
   rpc CreateItem(CreateItemRequest) returns (CreateItemResponse);
+  rpc GetAllItems(GetAllItemsRequest) returns (GetAllItemsResponse);
 }
 
 message GetItemRequest {
@@ -31,4 +32,18 @@ message CreateItemRequest {
 
 message CreateItemResponse {
   int32 id = 1;
+}
+
+message GetAllItemsRequest {}
+
+message Item {
+  int32 id = 1;
+  string title = 2;
+  string description = 3;
+  google.protobuf.Timestamp created_at = 4;
+  double price = 5;
+}
+
+message GetAllItemsResponse {
+  repeated Item items = 1;
 }
